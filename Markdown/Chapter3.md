@@ -957,4 +957,4 @@ console.log(myEvent.listenerCount('event2'));
 - ECONNREFUSED : 요청을 보냈으나 연결이 성립되지 않을 경우 발생
 - ETARGET : package.json에 기록한 패키지 버전이 존재하지 않을 때 발생
 - ETIMEOUT : 요청을 보냈으나 응답이 일정 시간 내 오지 않을 경우 발생
-- ENOENT : no such file or directory : 지정한 폴더나 파일이 존재하지 않는 경우 발생
+- ENOENT: no such file or directory : 지정한 폴더나 파일이 존재하지 않는 경우 발생
