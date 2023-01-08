@@ -656,6 +656,7 @@ fs.readFile('./Script/Chapter3/node3_5/readme.txt', (err, data) => {
 });
 ```
 - 콜백 형식의 모듈이기 때문에 실무에서 사용하기 위해서는 프로미스 형식으로 작성
+- readFile(파일 경로, 인코딩, 파일 읽기 모드) : 파일을 읽어옴
 ```javascript
 const fs = require('fs').promises;
 
@@ -669,6 +670,7 @@ fs.readFile('./Script/Chapter3/node3_5/readme.txt')
         console.error(err);
     });
 ```
+- writeFile(파일 경로, 인코딩) : 파일을 씀
 ```javascript
 const fs = require('fs').promises;
 
@@ -692,7 +694,7 @@ const fs = require('fs');
 
 console.log('시작');
 
-// 비동기 - 논블로킹 방식
+// 비동기 - 논블로킹 방식 : 순서가 보장되지 않음
 
 fs.readFile('./Script/Chapter3/node3_5/readme.txt', (err, data) => {
     if (err) {
@@ -724,7 +726,7 @@ console.log('끝');
 ```javascript
 const fs = require('fs');
 
-// 비동기방식으로 순서 유지
+// 비동기 - 논블로킹 방식, then 안에 작성해 순서 설정
 
 console.log('시작');
 
@@ -747,22 +749,6 @@ fs.readFile('./Script/Chapter3/node3_5/readme.txt', (err, data) => {
         });
     });
 });
-```
-
-- readFileSync 메서드를 사용할 시 많은 요청이 들어올 때 성능에 문제가 생길 수 있음
-- 동기 메서드들은 이름 뒤에 Sync가 붙어있음(writeFileSync, readFileSync 등)
-```javascript
-const fs = require('fs');
-
-// 동기-블로킹 방식, 순서대로 출력
-console.log('시작');
-let data = fs.readFileSync('./Script/Chapter3/node3_5/readme.txt');
-console.log('1번', data.toString());
-data = fs.readFileSync('./Script/Chapter3/node3_5/readme.txt');
-console.log('2번', data.toString());
-data = fs.readFileSync('./Script/Chapter3/node3_5/readme.txt');
-console.log('3번', data.toString());
-console.log('끝');
 ```
 ```javascript
 const fs = require('fs');
@@ -787,16 +773,36 @@ fs.readFile('./Script/Chapter3/node3_5/readme.txt')
     });
 ```
 
-##### 버퍼와 스트림 이해하기
+- readFileSync 메서드를 사용할 시 많은 요청이 들어올 때 성능에 문제가 생길 수 있음
+- 동기 메서드들은 이름 뒤에 Sync가 붙어있음(writeFileSync, readFileSync 등)
+```javascript
+const fs = require('fs');
+
+// 동기-블로킹 방식, 순서대로 출력
+console.log('시작');
+let data = fs.readFileSync('./Script/Chapter3/node3_5/readme.txt');
+console.log('1번', data.toString());
+data = fs.readFileSync('./Script/Chapter3/node3_5/readme.txt');
+console.log('2번', data.toString());
+data = fs.readFileSync('./Script/Chapter3/node3_5/readme.txt');
+console.log('3번', data.toString());
+console.log('끝');
+```
+
+##### 버퍼(Buffer)와 스트림(Stream)
+![](../Image/img3-4.png)
 - 노드에서 파일을 읽을 때 메모리에 파일 크기만큼 Buffer에 저장하고 데이터 전송
+  - 메모리와 시간을 효율적으로 사용할 수 있음
 - from(문자열) : 문자열을 버퍼로 변경
-- toString(버퍼) : 버퍼를 다시 문자열로 변경, base64나 hex를 인수로 넣으면 해당 인코딩으로 변경 가능
+- toString(인코딩 방식) : 버퍼를 다시 문자열로 변경, base64나 hex를 인수로 넣으면 해당 인코딩으로 변경 가능
+- copy(버퍼 이름) : 버퍼의 내용을 버퍼 이름에 복사
 - concat(배열) : 배열 안에 든 버퍼들을 하나로 합침
 - alloc(바이트) : 빈 버퍼 생성, 바이트를 인수로 넣으면 해당 크기의 버퍼 생성
+- allocUnsafe(바이트) : 빈 공간으로 초기화 과정 없이 버퍼 생성, 해당 공간이 사용 중인 경우 사용 중인 값이 출력
 ```javascript
 const buffer = Buffer.from('저를 버퍼로 바꾸십시오.');
-console.log('from() : ', buffer);
-console.log('length : ', buffer.length);
+console.log('from() : ', buffer); // 유니코드 형태로 출력
+console.log('length : ', buffer.length); // 버퍼 길이
 console.log('toString() : ', buffer.toString());
 
 const array = [Buffer.from('띄엄 '), Buffer.from('띄엄 '), Buffer.from('띄어쓰기')];
@@ -814,8 +820,8 @@ concat() :  띄엄 띄엄 띄어쓰기
 alloc() :  <Buffer 00 00 00 00 00>
 ```
 
-- Stream : 버퍼의 크기를 작게 만든 후 여러 번 나눠 보낼 수 있음
-  - readFile 방식 사용 시 용량이 커질 경우 메모리 문제를 대비
+- Stream : 버퍼의 크기를 작게 만든 후 여러 번 나눠 보내는 것
+  - readFile 방식 사용 시 용량이 커질 경우 메모리 사용에 비효율적이기 때문에 스트림 방식을 사용
 - createReadStream(읽을 파일 경로, 옵션) : 읽기 스트림 생성
   - highWaterMark : 버퍼의 크기(바이트 단위)를 정할 수 있는 옵션(기본값 : 64KB)
 - readStream : 스트림 정보를 읽으며, 이벤트 리스너를 붙여서 사용(data, end, error)
@@ -824,7 +830,7 @@ const fs = require('fs');
 
 const readStream = fs.createReadStream('./Script/Chapter3/node3_5/readme2.txt', {
     highWaterMark: 16
-});
+}); // 뒤로 .on을 이어 작성할 수 있음
 const data = [];
 
 // 파일 읽기가 시작되면 data 이벤트 리스너
@@ -868,10 +874,15 @@ writeStream.end();
 - pipe : 스트림끼리 연결, 파일을 전달할 수 있으며 여러 번 연결 가능
 ```javascript
 const fs = require('fs');
+const zlib = require('zlib'); // 파일을 압축하는 라이브러리
 
 const readStream = fs.createReadStream('readme.txt');
-const writeStream = fs.createWriteStream('writeme3.txt');
-readStream.pipe(writeStream); // readStream 내용의 writeStream 연결
+const zlibStream = zlib.createGzip(); // 파일을 압축된 형태로 사용 가능(.zip)
+const writeStream = fs.createWriteStream('writeme3.zip');
+const piping = readStream.pipe(zlibStream).pipe(writeStream); // readStream 내용의 writeStream 연결
+piping.on('finish', () => {
+    console.log('done!');
+});
 ```
 
 ##### 기타 fs 메서드
@@ -892,8 +903,8 @@ readStream.pipe(writeStream); // readStream 내용의 writeStream 연결
 - fs.watch(경로) : 파일/폴더 변경 사항 감지
 
 ##### 스레드풀
-- ??
-
+- 작업 처리에 사용되는 스레드 개수를 정하고 백그라운드 작업에 해당 개수만큼 나누어 동시 처리
+- fs, crypto, zlib, dns.lookup 등
 
 ### 이벤트
 - 이벤트 만들기
@@ -942,6 +953,41 @@ myEvent.removeListener('event5', listener);
 myEvent.emit('event5'); // 실행 안 됨
 
 console.log(myEvent.listenerCount('event2'));
+```
+
+- 재사용성이 있는 이벤트 클래스 만들기
+```javascript
+// 이벤트 클래스
+const EventEmitter = require('events');
+
+class Logger extends EventEmitter { // EventEmitter 클래스를 상속 받은 Logger 클래스 생성
+    log(callback) {
+        this.emit('log', 'started');
+        callback();
+        this.emit('log', 'ended');
+    }
+}
+
+module.exports.Logger = Logger;
+```
+```javascript
+// Event 클래스 사용(main.js)
+
+const logger = require('./logger.js');
+const emitter = new logger.Logger();
+
+emitter.on('log', (event) => {
+    console.log(event);
+});
+
+emitter.log(() => {
+    console.log('doing something!');
+})
+```
+```
+started
+doing something!
+ended
 ```
 
 ### 예외 처리
