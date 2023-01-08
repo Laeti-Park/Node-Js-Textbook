@@ -861,7 +861,7 @@ end :  안녕 나는 박동훈이라고 한다. 만나서 반갑다.
 ```javascript
 const fs = require('fs');
 
-const writeStream = fs.createWriteStream('./writeme2.txt');
+const writeStream = fs.createWriteStream('./Script/Chapter3/node3_5/writeme2.txt');
 writeStream.on('finish', () => { // 파일 작성 시 finish 이벤트 리스너
     console.log('파일 쓰기 완료'); 
 });
