@@ -10,7 +10,7 @@
 ### 객체 리터럴
 - 속성명과 변수명이 동일한 경우 한 번만 써도 괜찮음
 - 객체의 속성명은 동적으로 생성 가능
-- 
+
 ``` javascript
 var sayNode = function () {
     console.log('Node');
